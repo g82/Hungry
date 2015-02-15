@@ -2,12 +2,8 @@ package com.gamepari.hungryadventure;
 
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +11,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.gamepari.hungryadventure.assets.AssetImageTask;
 import com.gamepari.hungryadventure.foods.ModelFood;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -32,21 +27,13 @@ public class FoodPageFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "food_param";
-
+    AdventureActivity mActivity;
     // TODO: Rename and change types of parameters
     private ModelFood modelFood;
-
-    AdventureActivity mActivity;
 
 
     public FoodPageFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        mActivity = (AdventureActivity) activity;
     }
 
     // TODO: Rename and change types and number of parameters
@@ -59,6 +46,12 @@ public class FoodPageFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mActivity = (AdventureActivity) activity;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -66,107 +59,6 @@ public class FoodPageFragment extends Fragment {
         }
     }
 
-    private class LoadAssetTask extends AsyncTask<ModelFood, Void, Bitmap> {
-
-        private ImageView mImageView;
-
-        public LoadAssetTask(ImageView imageView) {
-            mImageView = imageView;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Bitmap doInBackground(ModelFood... params) {
-
-            String assetPath = params[0].getmAssetImagePath();
-
-            Bitmap bitmap = mActivity.getBitmapFromCache(params[0].getmName());
-
-            if (bitmap != null) {
-                Log.d("LoadAssetTask", "cache hitted.");
-                return bitmap;
-            }
-
-            try {
-                InputStream inputStream = getActivity().getAssets().open(assetPath);
-
-                BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inPreferredConfig = Bitmap.Config.RGB_565;
-
-                bitmap = BitmapFactory.decodeStream(inputStream, null, opts);
-
-                mActivity.putBitmapToCache(params[0].getmName(), bitmap);
-                Log.d("LoadAssetTask", "cache putted.");
-
-                return bitmap;
-
-            } catch (IOException e) {
-                Log.d("LoadAssetTask", e.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            super.onPostExecute(bitmap);
-            if (bitmap != null) mImageView.setImageBitmap(bitmap);
-        }
-    }
-
-    private class LoadAssetTask extends AsyncTask<ModelFood, Void, Bitmap> {
-
-        private ImageView mImageView;
-
-        public LoadAssetTask(ImageView imageView) {
-            mImageView = imageView;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Bitmap doInBackground(ModelFood... params) {
-
-            String assetPath = params[0].getmAssetImagePath();
-
-            Bitmap bitmap = mActivity.getBitmapFromCache(params[0].getmName());
-
-            if (bitmap != null) {
-                Log.d("LoadAssetTask", "cache hitted.");
-                return bitmap;
-            }
-
-            try {
-                InputStream inputStream = getActivity().getAssets().open(assetPath);
-
-                BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inPreferredConfig = Bitmap.Config.RGB_565;
-
-                bitmap = BitmapFactory.decodeStream(inputStream, null, opts);
-
-                mActivity.putBitmapToCache(params[0].getmName(), bitmap);
-                Log.d("LoadAssetTask", "cache putted.");
-
-                return bitmap;
-
-            } catch (IOException e) {
-                Log.d("LoadAssetTask", e.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            super.onPostExecute(bitmap);
-            if (bitmap != null) mImageView.setImageBitmap(bitmap);
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -180,7 +72,7 @@ public class FoodPageFragment extends Fragment {
 
         ImageView ivFood = (ImageView) v.findViewById(R.id.iv_food);
 
-        new LoadAssetTask(ivFood).execute(food);
+        new AssetImageTask(mActivity, ivFood).execute(food.getmName(), food.getmAssetImagePath());
 
         FrameLayout flLocked = (FrameLayout) v.findViewById(R.id.fl_locked);
         TextView tvName = (TextView) v.findViewById(R.id.tv_food_name);

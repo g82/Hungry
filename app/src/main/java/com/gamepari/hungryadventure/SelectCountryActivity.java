@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.gamepari.hungryadventure.assets.AssetImageTask;
 import com.gamepari.hungryadventure.country.ModelCountry;
 
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ public class SelectCountryActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_country);
-
 
         final ViewPager viewPager = (ViewPager) findViewById(R.id.vpager_country);
         viewPager.setOffscreenPageLimit(2);
@@ -71,10 +71,7 @@ public class SelectCountryActivity extends ActionBarActivity {
 
             }
         });
-
-
     }
-
 
     private class CountryPagerAdapter extends PagerAdapter {
 
@@ -83,8 +80,8 @@ public class SelectCountryActivity extends ActionBarActivity {
 
         private CountryPagerAdapter() {
 
-            ModelCountry seoul = new ModelCountry("Seoul", R.drawable.thumb_seoul, false);
-            ModelCountry tokyo = new ModelCountry("Tokyo", R.drawable.thumb_tokyo, true);
+            ModelCountry seoul = new ModelCountry("Seoul", false, "thumb_seoul.png");
+            ModelCountry tokyo = new ModelCountry("Tokyo", true, "thumb_tokyo.png");
 
             listCountry.add(seoul);
             listCountry.add(tokyo);
@@ -109,7 +106,6 @@ public class SelectCountryActivity extends ActionBarActivity {
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             super.destroyItem(container, position, object);
-
             container.removeView((View) object);
         }
 
@@ -125,12 +121,13 @@ public class SelectCountryActivity extends ActionBarActivity {
             TextView tvLocked = (TextView) page.findViewById(R.id.tv_country_locked);
 
             tvName.setText(country.getName());
-            ivThumb.setImageResource(country.getThumbnail_id());
+
+            new AssetImageTask(SelectCountryActivity.this, ivThumb).execute(country.getName(), country.getmAssetPath());
+
             tvLocked.setVisibility(country.isLocked() ? View.VISIBLE : View.INVISIBLE);
 
             container.addView(page, position);
 
-            //return super.instantiateItem(container, position);
             return page;
         }
 

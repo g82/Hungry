@@ -6,21 +6,21 @@ package com.gamepari.hungryadventure.country;
 public class ModelCountry {
 
     private String name;
-    private int thumbnail_id;
     private boolean isLocked;
+    private String mAssetPath;
 
-    public ModelCountry(String name, int thumbnail_id, boolean isLocked) {
+    public ModelCountry(String name, boolean isLocked, String mAssetPath) {
         this.name = name;
-        this.thumbnail_id = thumbnail_id;
         this.isLocked = isLocked;
+        this.mAssetPath = mAssetPath;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getThumbnail_id() {
-        return thumbnail_id;
+    public String getmAssetPath() {
+        return mAssetPath;
     }
 
     public boolean isLocked() {

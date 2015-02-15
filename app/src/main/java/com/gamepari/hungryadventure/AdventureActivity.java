@@ -1,11 +1,9 @@
 package com.gamepari.hungryadventure;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.util.LruCache;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
@@ -21,8 +19,6 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
 
     private FoodsPagerAdapter mFoodPagerAdapter;
 
-    private LruCache<String, Bitmap> mImageCache;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,8 +30,6 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
 
         findViewById(R.id.btn_history).setOnClickListener(this);
 
-        mImageCache = new LruCache<>(10 * 1024 * 1024);
-
         ViewPager viewPager = (ViewPager) findViewById(R.id.vpager_foods);
         viewPager.setOffscreenPageLimit(3);
         viewPager.setPageMargin(-500);
@@ -44,14 +38,6 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
 
         viewPager.setAdapter(mFoodPagerAdapter);
 
-    }
-
-    public void putBitmapToCache(String key, Bitmap bitmap) {
-        mImageCache.put(key, bitmap);
-    }
-
-    public Bitmap getBitmapFromCache(String key) {
-        return mImageCache.get(key);
     }
 
     @Override
