@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:orientation="vertical">
 
@@ -12,8 +12,7 @@
         <ImageView
             android:id="@+id/iv_food"
             android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:src="@drawable/item_bossam" />
+            android:layout_height="160dp" />
 
         <FrameLayout
             android:id="@+id/fl_locked"
@@ -22,9 +21,7 @@
             android:background="@drawable/item_locked"
             android:visibility="visible" />
 
-
     </FrameLayout>
-
 
     <TextView
         android:id="@+id/tv_food_name"

@@ -13,8 +13,7 @@
         <ImageView
             android:id="@+id/iv_food"
             android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:src="@drawable/item_bossam" />
+            android:layout_height="160dp" />
 
         <FrameLayout
             android:id="@+id/fl_locked"

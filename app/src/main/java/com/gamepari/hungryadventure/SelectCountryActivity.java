@@ -30,7 +30,7 @@ public class SelectCountryActivity extends ActionBarActivity {
 
         final ViewPager viewPager = (ViewPager) findViewById(R.id.vpager_country);
         viewPager.setOffscreenPageLimit(2);
-        viewPager.setPageMargin(-400);
+        //viewPager.setPageMargin(-400);
 
         final Button btnStart = (Button) findViewById(R.id.btn_start);
 

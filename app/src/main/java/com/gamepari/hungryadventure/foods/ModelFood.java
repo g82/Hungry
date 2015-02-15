@@ -12,14 +12,27 @@ public class ModelFood implements Serializable {
     private String mName;
     private int mUnlockStepCount;
     private Date mUnlockDate;
-    private int mImageResourceId;
 
-    public ModelFood(int mIndex, String mName, int mUnlockStepCount, Date mUnlockDate, int mImageResourceId) {
+    private String mAssetImagePath;
+
+    public ModelFood(int mIndex, String mName, int mUnlockStepCount, String mAssetImagePath) {
+        this.mIndex = mIndex;
+        this.mName = mName;
+        this.mUnlockStepCount = mUnlockStepCount;
+        this.mAssetImagePath = mAssetImagePath;
+    }
+
+    public ModelFood(int mIndex, String mName, int mUnlockStepCount, Date mUnlockDate, String mAssetImagePath) {
         this.mIndex = mIndex;
         this.mName = mName;
         this.mUnlockStepCount = mUnlockStepCount;
         this.mUnlockDate = mUnlockDate;
-        this.mImageResourceId = mImageResourceId;
+        this.mAssetImagePath = mAssetImagePath;
+    }
+
+
+    public String getmAssetImagePath() {
+        return mAssetImagePath;
     }
 
     public int getmIndex() {
@@ -38,7 +51,4 @@ public class ModelFood implements Serializable {
         return mUnlockDate;
     }
 
-    public int getmImageResourceId() {
-        return mImageResourceId;
-    }
 }

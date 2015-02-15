@@ -1,21 +1,17 @@
 package com.gamepari.hungryadventure;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
+import android.support.v4.util.LruCache;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.gamepari.hungryadventure.foods.ModelFood;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,9 +21,12 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
 
     private FoodsPagerAdapter mFoodPagerAdapter;
 
+    private LruCache<String, Bitmap> mImageCache;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_adventure);
 
         String countryName = getIntent().getStringExtra("country");
@@ -35,14 +34,24 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
 
         findViewById(R.id.btn_history).setOnClickListener(this);
 
+        mImageCache = new LruCache<>(10 * 1024 * 1024);
+
         ViewPager viewPager = (ViewPager) findViewById(R.id.vpager_foods);
-        viewPager.setPageMargin(-600);
-        viewPager.setOffscreenPageLimit(6);
+        viewPager.setOffscreenPageLimit(3);
+        viewPager.setPageMargin(-500);
 
         mFoodPagerAdapter = new FoodsPagerAdapter(getSupportFragmentManager());
 
         viewPager.setAdapter(mFoodPagerAdapter);
 
+    }
+
+    public void putBitmapToCache(String key, Bitmap bitmap) {
+        mImageCache.put(key, bitmap);
+    }
+
+    public Bitmap getBitmapFromCache(String key) {
+        return mImageCache.get(key);
     }
 
     @Override
@@ -59,18 +68,41 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
 
         private FoodsPagerAdapter(FragmentManager fm) {
             super(fm);
+
             listFragments = new ArrayList<>();
 
-            ModelFood food1 = new ModelFood(0, "Galbi", 300, new Date(System.currentTimeMillis()), R.drawable.item_galbi);
-            ModelFood food2 = new ModelFood(1, "Bossam", 300, new Date(System.currentTimeMillis()), R.drawable.item_bossam);
-            ModelFood food3 = new ModelFood(2, "Ddukbbok", 300, new Date(System.currentTimeMillis()), R.drawable.item_dduk);
-            ModelFood food4 = new ModelFood(3, "galbitang", 300, new Date(System.currentTimeMillis()), R.drawable.item_galbitang);
-            ModelFood food5 = new ModelFood(4, "Moolhoi", 300, new Date(System.currentTimeMillis()), R.drawable.item_moolfish);
-            ModelFood food6 = new ModelFood(5, "Naengmyun", 300, null, R.drawable.item_myun);
+            ModelFood[] foods = new ModelFood[6];
 
-            FoodPageFragment foodPageFragment = FoodPageFragment.newInstance(food1);
+            foods[0] = new ModelFood(0, "Galbi", 300, new Date(System.currentTimeMillis()), "item_galbi.png");
+            foods[1] = new ModelFood(1, "Bossam", 300, new Date(System.currentTimeMillis()), "item_bossam.png");
+            foods[2] = new ModelFood(2, "Ddukbbok", 300, new Date(System.currentTimeMillis()), "item_dduk.png");
+            foods[3] = new ModelFood(3, "galbitang", 300, new Date(System.currentTimeMillis()), "item_galbitang.png");
+            foods[4] = new ModelFood(4, "Moolhoi", 300, new Date(System.currentTimeMillis()), "item_moolfish.png");
+            foods[5] = new ModelFood(5, "Naengmyun", 300, "item_myun.png");
 
-            listFragments.add(foodPageFragment);
+            for (ModelFood food : foods) {
+                listFragments.add(FoodPageFragment.newInstance(food));
+            }
+
+            for (ModelFood food : foods) {
+                listFragments.add(FoodPageFragment.newInstance(food));
+            }
+
+            for (ModelFood food : foods) {
+                listFragments.add(FoodPageFragment.newInstance(food));
+            }
+
+            for (ModelFood food : foods) {
+                listFragments.add(FoodPageFragment.newInstance(food));
+            }
+
+            for (ModelFood food : foods) {
+                listFragments.add(FoodPageFragment.newInstance(food));
+            }
+
+            for (ModelFood food : foods) {
+                listFragments.add(FoodPageFragment.newInstance(food));
+            }
 
             //you have eaten 56% of seoul.
 
@@ -87,88 +119,4 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         }
     }
 
-    private class FoodPagerAdapter extends PagerAdapter {
-
-        SimpleDateFormat simpleDateFormat;
-        private List<ModelFood> listFoods;
-
-        private FoodPagerAdapter() {
-
-            listFoods = new ArrayList<>();
-
-            ModelFood food1 = new ModelFood(0, "Galbi", 300, new Date(System.currentTimeMillis()), R.drawable.item_galbi);
-            ModelFood food2 = new ModelFood(1, "Bossam", 300, new Date(System.currentTimeMillis()), R.drawable.item_bossam);
-            ModelFood food3 = new ModelFood(2, "Ddukbbok", 300, new Date(System.currentTimeMillis()), R.drawable.item_dduk);
-            ModelFood food4 = new ModelFood(3, "galbitang", 300, new Date(System.currentTimeMillis()), R.drawable.item_galbitang);
-            ModelFood food5 = new ModelFood(4, "Moolhoi", 300, new Date(System.currentTimeMillis()), R.drawable.item_moolfish);
-            ModelFood food6 = new ModelFood(5, "Naengmyun", 300, null, R.drawable.item_myun);
-
-            listFoods.add(food1);
-            listFoods.add(food2);
-            listFoods.add(food3);
-            listFoods.add(food4);
-            listFoods.add(food5);
-            listFoods.add(food6);
-
-
-            simpleDateFormat = new SimpleDateFormat("MM dd, yyyy");
-        }
-
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            //super.destroyItem(container, position, object);
-            ((ViewPager) container).removeView((View) object);
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-
-            View v = View.inflate(AdventureActivity.this, R.layout.page_foods, null);
-
-            ModelFood food = listFoods.get(position);
-
-            Date unlockedDate = food.getmUnlockDate();
-
-            ImageView ivFood = (ImageView) v.findViewById(R.id.iv_food);
-            ivFood.setImageResource(food.getmImageResourceId());
-
-            FrameLayout flLocked = (FrameLayout) v.findViewById(R.id.fl_locked);
-            TextView tvName = (TextView) v.findViewById(R.id.tv_food_name);
-            tvName.setText(food.getmName());
-
-            TextView tvDate = (TextView) v.findViewById(R.id.tv_food_unlockdate);
-
-            if (unlockedDate == null) {
-                //FOOD IS LOCK.
-                flLocked.setVisibility(View.VISIBLE);
-
-                tvName.setText("Locked");
-                tvDate.setVisibility(View.INVISIBLE);
-            } else {
-                //FOOD UNLOCK.
-                flLocked.setVisibility(View.INVISIBLE);
-
-                tvName.setText(food.getmName());
-                tvDate.setText("Unlocked " + simpleDateFormat.format(unlockedDate));
-
-            }
-
-//            return super.instantiateItem(container, position);
-
-            ((ViewPager) container).addView(v);
-
-            return v;
-        }
-
-        @Override
-        public int getCount() {
-            return listFoods.size();
-        }
-
-        @Override
-        public boolean isViewFromObject(View view, Object o) {
-            return view == o;
-        }
-    }
 }
