@@ -4,6 +4,7 @@ package com.gamepari.hungryadventure;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,6 @@ import com.gamepari.hungryadventure.assets.AssetImageTask;
 import com.gamepari.hungryadventure.foods.ModelFood;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 
 /**
@@ -68,15 +68,15 @@ public class FoodPageFragment extends Fragment {
 
         ModelFood food = modelFood;
 
-        Date unlockedDate = food.getmUnlockDate();
+        Time unlockedDate = food.getmUnlockDate();
 
         ImageView ivFood = (ImageView) v.findViewById(R.id.iv_food);
 
-        new AssetImageTask(mActivity, ivFood).execute(food.getmName(), food.getmAssetImagePath());
+        new AssetImageTask(mActivity, ivFood).execute(food.getmName_local(), food.getmAssetImagePath());
 
         FrameLayout flLocked = (FrameLayout) v.findViewById(R.id.fl_locked);
         TextView tvName = (TextView) v.findViewById(R.id.tv_food_name);
-        tvName.setText(food.getmName());
+        tvName.setText(food.getmName_local());
 
         TextView tvDate = (TextView) v.findViewById(R.id.tv_food_unlockdate);
 
@@ -90,7 +90,7 @@ public class FoodPageFragment extends Fragment {
             //FOOD UNLOCK.
             flLocked.setVisibility(View.INVISIBLE);
 
-            tvName.setText(food.getmName());
+            tvName.setText(food.getmName_local());
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM dd, yyyy");
             tvDate.setText("Unlocked " + simpleDateFormat.format(unlockedDate));

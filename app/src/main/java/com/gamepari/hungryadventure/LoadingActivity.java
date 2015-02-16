@@ -1,9 +1,10 @@
 package com.gamepari.hungryadventure;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
+
+import com.gamepari.hungryadventure.preferences.PreferenceIO;
 
 
 public class LoadingActivity extends ActionBarActivity {
@@ -12,28 +13,18 @@ public class LoadingActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
-    }
 
+        //TODO a little bit delay
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_loading, menu);
-        return true;
-    }
+        String country = PreferenceIO.loadPreference(this, PreferenceIO.KEY_COUNTRY);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (country == null) {
+            startActivity(new Intent(this, SelectCountryActivity.class));
+        } else {
+            startActivity(new Intent(this, AdventureActivity.class));
         }
 
-        return super.onOptionsItemSelected(item);
+        finish();
     }
+
 }

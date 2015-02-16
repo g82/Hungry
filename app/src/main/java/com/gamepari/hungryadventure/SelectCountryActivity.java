@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.gamepari.hungryadventure.assets.AssetImageTask;
 import com.gamepari.hungryadventure.country.ModelCountry;
+import com.gamepari.hungryadventure.preferences.PreferenceIO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,18 +36,25 @@ public class SelectCountryActivity extends ActionBarActivity {
 
         final Button btnStart = (Button) findViewById(R.id.btn_start);
 
+
+        // Adventure Start.
+        // save country  preference
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Intent i = new Intent();
-                i.setClass(SelectCountryActivity.this, AdventureActivity.class);
-
                 String selectedCountryName = mCountryPagerAdapter.getListCountry().get(viewPager.getCurrentItem()).getName();
                 Log.d(SelectCountryActivity.class.getSimpleName(), selectedCountryName);
-                i.putExtra("country", selectedCountryName);
 
-                startActivity(i);
+
+                PreferenceIO.savePreference(SelectCountryActivity.this, PreferenceIO.KEY_COUNTRY, selectedCountryName);
+
+                Time time = new Time();
+                time.setToNow();
+
+                PreferenceIO.savePreference(SelectCountryActivity.this, PreferenceIO.KEY_START_DATE, String.valueOf(time.toMillis(true)));
+
+                startActivity(new Intent(SelectCountryActivity.this, AdventureActivity.class));
                 finish();
             }
         });
