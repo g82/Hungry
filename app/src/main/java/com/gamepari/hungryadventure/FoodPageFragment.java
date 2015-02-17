@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.gamepari.hungryadventure.assets.AssetImageTask;
-import com.gamepari.hungryadventure.foods.ModelFood;
+import com.gamepari.hungryadventure.contents.ModelFood;
 
 import java.text.SimpleDateFormat;
 
@@ -68,7 +68,7 @@ public class FoodPageFragment extends Fragment {
 
         ModelFood food = modelFood;
 
-        Time unlockedDate = food.getmUnlockDate();
+        Time unlockedDate = food.getmUnlockTime();
 
         ImageView ivFood = (ImageView) v.findViewById(R.id.iv_food);
 
@@ -95,6 +95,13 @@ public class FoodPageFragment extends Fragment {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM dd, yyyy");
             tvDate.setText("Unlocked " + simpleDateFormat.format(unlockedDate));
         }
+
+        ivFood.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mActivity.showUnlockDialog();
+            }
+        });
 
         return v;
     }

@@ -31,7 +31,7 @@ public class FitDataAdapter {
 
                     FitData fitData = new FitData();
 
-                    //fitData.setType(dataPoint.getDataType().getName());
+                    //fitData.setType(dataPoint.getDataType().getLocal_name());
                     fitData.setStartTime(dataPoint.getStartTime(TimeUnit.MILLISECONDS));
                     fitData.setEndTime(dataPoint.getEndTime(TimeUnit.MILLISECONDS));
                     fitData.setValue(dataPoint.getValue(Field.FIELD_STEPS).asInt());

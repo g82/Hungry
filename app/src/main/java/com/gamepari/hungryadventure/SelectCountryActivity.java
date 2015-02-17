@@ -1,6 +1,7 @@
 package com.gamepari.hungryadventure;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -14,7 +15,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.gamepari.hungryadventure.assets.AssetImageTask;
-import com.gamepari.hungryadventure.country.ModelCountry;
+import com.gamepari.hungryadventure.contents.HungryDatabase;
+import com.gamepari.hungryadventure.contents.ModelCity;
 import com.gamepari.hungryadventure.preferences.PreferenceIO;
 
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ public class SelectCountryActivity extends ActionBarActivity {
             @Override
             public void onClick(View view) {
 
-                String selectedCountryName = mCountryPagerAdapter.getListCountry().get(viewPager.getCurrentItem()).getName();
+                String selectedCountryName = mCountryPagerAdapter.getListCountry().get(viewPager.getCurrentItem()).getEng_name();
                 Log.d(SelectCountryActivity.class.getSimpleName(), selectedCountryName);
 
 
@@ -71,8 +73,8 @@ public class SelectCountryActivity extends ActionBarActivity {
             @Override
             public void onPageSelected(int i) {
 
-                ModelCountry country = mCountryPagerAdapter.getListCountry().get(i);
-                btnStart.setEnabled(!country.isLocked());
+                ModelCity country = mCountryPagerAdapter.getListCountry().get(i);
+                btnStart.setEnabled(country.isUnlocked());
             }
 
             @Override
@@ -80,36 +82,46 @@ public class SelectCountryActivity extends ActionBarActivity {
 
             }
         });
+
+        new DatabaseTask().execute();
+    }
+
+    private class DatabaseTask extends AsyncTask<Void, Void, List<ModelCity>> {
+
+        @Override
+        protected List<ModelCity> doInBackground(Void... voids) {
+
+            HungryDatabase database = new HungryDatabase(SelectCountryActivity.this, HungryDatabase.DB_HUNGRY, null, 1);
+            return database.getCities();
+        }
+
+        @Override
+        protected void onPostExecute(List<ModelCity> modelCountries) {
+            super.onPostExecute(modelCountries);
+            mCountryPagerAdapter.setDatas(modelCountries);
+        }
     }
 
     private class CountryPagerAdapter extends PagerAdapter {
 
-        private List<ModelCountry> listCountry = new ArrayList();
+        private List<ModelCity> listCountry = new ArrayList();
 
-
-        private CountryPagerAdapter() {
-
-            ModelCountry seoul = new ModelCountry("Seoul", false, "thumb_seoul.png");
-            ModelCountry tokyo = new ModelCountry("Tokyo", true, "thumb_tokyo.png");
-
-            listCountry.add(seoul);
-            listCountry.add(tokyo);
-        }
-
-        @Override
-        public float getPageWidth(int position) {
-
-//            return 0.8f;
-            return super.getPageWidth(position);
-        }
-
-        public List<ModelCountry> getListCountry() {
+        public List<ModelCity> getListCountry() {
             return listCountry;
         }
 
         @Override
         public int getCount() {
             return listCountry.size();
+        }
+
+        public void setDatas(List<ModelCity> listCity) {
+            for (ModelCity city : listCity) {
+
+                listCountry.add(city);
+            }
+
+            notifyDataSetChanged();
         }
 
         @Override
@@ -121,7 +133,7 @@ public class SelectCountryActivity extends ActionBarActivity {
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
 
-            ModelCountry country = listCountry.get(position);
+            ModelCity country = listCountry.get(position);
 
             View page = View.inflate(SelectCountryActivity.this, R.layout.page_country, null);
 
@@ -129,11 +141,11 @@ public class SelectCountryActivity extends ActionBarActivity {
             ImageView ivThumb = (ImageView) page.findViewById(R.id.iv_thumb);
             TextView tvLocked = (TextView) page.findViewById(R.id.tv_country_locked);
 
-            tvName.setText(country.getName());
+            tvName.setText(country.getLocal_name());
 
-            new AssetImageTask(SelectCountryActivity.this, ivThumb).execute(country.getName(), country.getmAssetPath());
+            new AssetImageTask(SelectCountryActivity.this, ivThumb).execute(country.getLocal_name(), country.getMimgPath());
 
-            tvLocked.setVisibility(country.isLocked() ? View.VISIBLE : View.INVISIBLE);
+            tvLocked.setVisibility(country.isUnlocked() ? View.INVISIBLE : View.VISIBLE);
 
             container.addView(page, position);
 

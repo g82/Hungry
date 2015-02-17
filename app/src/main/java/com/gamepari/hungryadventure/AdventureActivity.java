@@ -16,8 +16,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.gamepari.hungryadventure.foods.FoodDatabase;
-import com.gamepari.hungryadventure.foods.ModelFood;
+import com.gamepari.hungryadventure.contents.HungryDatabase;
+import com.gamepari.hungryadventure.contents.ModelFood;
 import com.gamepari.hungryadventure.preferences.PreferenceIO;
 import com.gamepari.hungryadventure.provider.FitData;
 import com.gamepari.hungryadventure.provider.FitDataProvider;
@@ -200,6 +200,12 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         }
     }
 
+    public void showUnlockDialog() {
+        // Create an instance of the dialog fragment and show it
+        DialogFragment dialog = new UnlockFragment();
+        dialog.show(getSupportFragmentManager(), "UnlockFragment");
+    }
+
     /* A fragment to display an error dialog */
     public static class ErrorDialogFragment extends DialogFragment {
         public ErrorDialogFragment() {
@@ -232,13 +238,13 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         @Override
         protected Object doInBackground(String... strings) {
 
-            FoodDatabase foodDatabase = new FoodDatabase(AdventureActivity.this, FoodDatabase.DB_HUNGRY, null, 1);
+            HungryDatabase hungryDatabase = new HungryDatabase(AdventureActivity.this, HungryDatabase.DB_HUNGRY, null, 1);
 
             switch (strings[0]) {
                 case OPER_GET_FOOD:
 
                     String country = strings[1];
-                    return foodDatabase.getFoods(country);
+                    return hungryDatabase.getFoods(country);
 
                 case OPER_UNLOCK_FOOD:
 
