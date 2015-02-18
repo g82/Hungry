@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SelectCountryActivity extends ActionBarActivity {
+public class SelectCityActivity extends ActionBarActivity {
 
     CountryPagerAdapter mCountryPagerAdapter;
 
@@ -46,17 +46,16 @@ public class SelectCountryActivity extends ActionBarActivity {
             public void onClick(View view) {
 
                 String selectedCountryName = mCountryPagerAdapter.getListCountry().get(viewPager.getCurrentItem()).getEng_name();
-                Log.d(SelectCountryActivity.class.getSimpleName(), selectedCountryName);
+                Log.d(SelectCityActivity.class.getSimpleName(), selectedCountryName);
 
-
-                PreferenceIO.savePreference(SelectCountryActivity.this, PreferenceIO.KEY_COUNTRY, selectedCountryName);
+                PreferenceIO.savePreference(SelectCityActivity.this, PreferenceIO.KEY_COUNTRY, selectedCountryName);
 
                 Time time = new Time();
                 time.setToNow();
 
-                PreferenceIO.savePreference(SelectCountryActivity.this, PreferenceIO.KEY_START_DATE, String.valueOf(time.toMillis(true)));
+                PreferenceIO.savePreference(SelectCityActivity.this, PreferenceIO.KEY_START_DATE, String.valueOf(time.toMillis(true)));
 
-                startActivity(new Intent(SelectCountryActivity.this, AdventureActivity.class));
+                startActivity(new Intent(SelectCityActivity.this, AdventureActivity.class));
                 finish();
             }
         });
@@ -91,7 +90,7 @@ public class SelectCountryActivity extends ActionBarActivity {
         @Override
         protected List<ModelCity> doInBackground(Void... voids) {
 
-            HungryDatabase database = new HungryDatabase(SelectCountryActivity.this, HungryDatabase.DB_HUNGRY, null, 1);
+            HungryDatabase database = new HungryDatabase(SelectCityActivity.this, HungryDatabase.DB_HUNGRY, null, 1);
             return database.getCities();
         }
 
@@ -135,15 +134,17 @@ public class SelectCountryActivity extends ActionBarActivity {
 
             ModelCity country = listCountry.get(position);
 
-            View page = View.inflate(SelectCountryActivity.this, R.layout.page_country, null);
+            View page = View.inflate(SelectCityActivity.this, R.layout.page_country, null);
 
             TextView tvName = (TextView) page.findViewById(R.id.tv_country_name);
             ImageView ivThumb = (ImageView) page.findViewById(R.id.iv_thumb);
             TextView tvLocked = (TextView) page.findViewById(R.id.tv_country_locked);
+            TextView tvEngName = (TextView) page.findViewById(R.id.tv_eng_name);
 
             tvName.setText(country.getLocal_name());
+            tvEngName.setText(country.getEng_name());
 
-            new AssetImageTask(SelectCountryActivity.this, ivThumb).execute(country.getLocal_name(), country.getMimgPath());
+            new AssetImageTask(SelectCityActivity.this, ivThumb).execute(country.getLocal_name(), country.getMimgPath());
 
             tvLocked.setVisibility(country.isUnlocked() ? View.INVISIBLE : View.VISIBLE);
 

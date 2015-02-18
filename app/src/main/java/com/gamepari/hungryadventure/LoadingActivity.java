@@ -19,7 +19,7 @@ public class LoadingActivity extends ActionBarActivity {
         String country = PreferenceIO.loadPreference(this, PreferenceIO.KEY_COUNTRY);
 
         if (country == null) {
-            startActivity(new Intent(this, SelectCountryActivity.class));
+            startActivity(new Intent(this, SelectCityActivity.class));
         } else {
             startActivity(new Intent(this, AdventureActivity.class));
         }

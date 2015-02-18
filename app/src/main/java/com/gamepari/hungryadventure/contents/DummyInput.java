@@ -27,7 +27,7 @@ public class DummyInput {
 
                 "(" +
                 "1," +
-                "'동경'," +
+                "'東京'," +
                 "'Tokyo'," +
                 "'thumb_tokyo.png'," +
                 "0" +

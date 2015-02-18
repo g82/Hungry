@@ -71,6 +71,8 @@ public class AssetImageTask extends AsyncTask<String, Void, Bitmap> {
             getCache().put(key, bitmap);
             Log.d("LoadAssetTask", "cache putted.");
 
+            inputStream.close();
+
             return bitmap;
 
         } catch (IOException e) {

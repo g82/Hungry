@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class AdventureActivity extends ActionBarActivity implements View.OnClickListener, UnlockFragment.UnlockDialogListener {
+public class AdventureActivity extends ActionBarActivity implements View.OnClickListener, UnlockDialogFragment.UnlockDialogListener {
 
     private static final String TAG = "AdventureActivity";
     private static final int REQUEST_RESOLVE_ERROR = 1001;
@@ -40,6 +40,11 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
     private GoogleApiClient mGoogleApiClient;
     private boolean mResolvingError = false;
     private TextView tvSteps;
+    private TextView tvTotalSteps;
+
+    private String cityName;
+
+    private ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,30 +56,39 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         setContentView(R.layout.activity_adventure);
 
         tvSteps = (TextView) findViewById(R.id.tv_steps);
+        tvTotalSteps = (TextView) findViewById(R.id.tv_totalsteps);
 
         buildGoogleClient();
 
-        String countryName = PreferenceIO.loadPreference(this, PreferenceIO.KEY_COUNTRY);
+        cityName = PreferenceIO.loadPreference(this, PreferenceIO.KEY_COUNTRY);
 
-        getSupportActionBar().setTitle("Hungry " + countryName);
+        getSupportActionBar().setTitle("Hungry " + cityName);
 
         findViewById(R.id.btn_history).setOnClickListener(this);
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.vpager_foods);
-        viewPager.setOffscreenPageLimit(3);
-        viewPager.setPageMargin(-500);
+        mViewPager = (ViewPager) findViewById(R.id.vpager_foods);
+        mViewPager.setOffscreenPageLimit(3);
+        mViewPager.setPageMargin(-500);
 
-        mFoodPagerAdapter = new FoodsPagerAdapter(getSupportFragmentManager());
+        //mFoodPagerAdapter = new FoodsPagerAdapter(getSupportFragmentManager());
 
-        viewPager.setAdapter(mFoodPagerAdapter);
-
-        new DatabaseTask().execute("GET_FOOD", countryName);
+        //mViewPager.setAdapter(mFoodPagerAdapter);
     }
 
     @Override
     public void onDialogPositiveClick(ModelFood food) {
         //TODO update data
-        new DatabaseTask().execute("UNLOCK_FOOD", food.getmName_eng());
+
+        int needPoint = food.getmRequiredStepCount();
+        int availpoint = PreferenceIO.loadAvailCount(this, PreferenceIO.KEY_AVAIL_STEPS);
+
+        PreferenceIO.saveAvailCount(this, PreferenceIO.KEY_AVAIL_STEPS, availpoint - needPoint);
+
+        int remainPoint = PreferenceIO.loadAvailCount(this, PreferenceIO.KEY_AVAIL_STEPS);
+
+        tvSteps.setText("Available step point : " + String.valueOf(remainPoint));
+
+        new DatabaseTask().execute(DatabaseTask.OPER_UNLOCK_FOOD, food.getmName_eng());
     }
 
     @Override
@@ -95,6 +109,8 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
                         String startDate = PreferenceIO.loadPreference(AdventureActivity.this,
                                 PreferenceIO.KEY_START_DATE);
 
+                        findViewById(R.id.fl_loading).setVisibility(View.GONE);
+
                         new FitDataProvider(new FitDataProvider.OnDataProvideListener() {
                             @Override
                             public void onDataLoaded(Object o) {
@@ -106,10 +122,21 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
                                     totalSteps += fit.getValue();
                                 }
 
-                                tvSteps.setText(String.valueOf(totalSteps) + " Steps");
+                                totalSteps = (totalSteps > 0) ? totalSteps : 0;
+
+                                String usedSteps = PreferenceIO.loadPreference(AdventureActivity.this, PreferenceIO.KEY_USED_STEPS);
+                                if (usedSteps == null) usedSteps = "0";
+                                int availstep = totalSteps - Integer.valueOf(usedSteps);
+
+                                tvSteps.setText("Available step point : " + String.valueOf(availstep));
+                                tvTotalSteps.setText("Total step point in " + cityName + " : " + String.valueOf(totalSteps));
+
 
                             }
                         }, mGoogleApiClient).execute(startDate);
+
+
+                        new DatabaseTask().execute(DatabaseTask.OPER_GET_FOOD, cityName);
 
                     }
 
@@ -190,6 +217,8 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
                 if (!mGoogleApiClient.isConnecting() && !mGoogleApiClient.isConnected()) {
                     mGoogleApiClient.connect();
                 }
+            } else {
+                mGoogleApiClient.connect();
             }
 
         }
@@ -212,12 +241,11 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
 
     public void showUnlockDialog(ModelFood modelFood) {
         // Create an instance of the dialog fragment and show it
-        DialogFragment dialog = new UnlockFragment();
-
+        DialogFragment dialog = new UnlockDialogFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable("food", modelFood);
         dialog.setArguments(bundle);
-        dialog.show(getSupportFragmentManager(), "UnlockFragment");
+        dialog.show(getSupportFragmentManager(), "UnlockDialogFragment");
     }
 
     /* A fragment to display an error dialog */
@@ -244,6 +272,9 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         public static final String OPER_GET_FOOD = "GET_FOOD";
         public static final String OPER_UNLOCK_FOOD = "UNLOCK_FOOD";
 
+        private String operation_type;
+        private String eng_name;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -252,18 +283,18 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         @Override
         protected Object doInBackground(String... strings) {
 
+            operation_type = strings[0];
+
             HungryDatabase hungryDatabase = new HungryDatabase(AdventureActivity.this, HungryDatabase.DB_HUNGRY, null, 1);
 
             switch (strings[0]) {
                 case OPER_GET_FOOD:
-
                     String country = strings[1];
                     return hungryDatabase.getFoods(country);
 
                 case OPER_UNLOCK_FOOD:
-
-                    break;
-
+                    eng_name = strings[1];
+                    return hungryDatabase.unlockFood(eng_name);
             }
 
             return null;
@@ -273,34 +304,40 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         protected void onPostExecute(Object o) {
             super.onPostExecute(o);
 
-            if (o == null) return;
+            switch (operation_type) {
+                case OPER_GET_FOOD:
+                    if (o == null) return;
 
-            List<ModelFood> modelFoods = (List<ModelFood>) o;
-            mFoodPagerAdapter.setDatas(modelFoods);
+                    int page = mViewPager.getCurrentItem();
+                    List<ModelFood> modelFoods = (List<ModelFood>) o;
+                    mFoodPagerAdapter = new FoodsPagerAdapter(getSupportFragmentManager(), modelFoods);
+                    mViewPager.setAdapter(mFoodPagerAdapter);
+                    mViewPager.setCurrentItem(page);
+                    break;
 
+                case OPER_UNLOCK_FOOD:
+                    new DatabaseTask().execute(OPER_GET_FOOD, cityName);
+                    break;
+            }
         }
     }
 
     private class FoodsPagerAdapter extends FragmentStatePagerAdapter {
 
         List<Fragment> listFragments;
+        List<ModelFood> mListFoods;
 
-        private FoodsPagerAdapter(FragmentManager fm) {
+        private FoodsPagerAdapter(FragmentManager fm, List<ModelFood> mListFoods) {
             super(fm);
 
             listFragments = new ArrayList<>();
 
-            //you have eaten 56% of seoul.
+            this.mListFoods = mListFoods;
 
-        }
-
-        public void setDatas(List<ModelFood> listFoods) {
-
-            for (ModelFood food : listFoods) {
+            for (ModelFood food : mListFoods) {
                 listFragments.add(FoodPageFragment.newInstance(food));
             }
 
-            notifyDataSetChanged();
         }
 
         @Override

@@ -18,7 +18,7 @@ import com.gamepari.hungryadventure.contents.ModelFood;
 /**
  * Created by gamepari on 2/17/15.
  */
-public class UnlockFragment extends DialogFragment {
+public class UnlockDialogFragment extends DialogFragment {
 
 
     private UnlockDialogListener mUnlockDialogListener;
@@ -63,11 +63,11 @@ public class UnlockFragment extends DialogFragment {
         View v = inflater.inflate(R.layout.dialog_unlock, null);
 
         TextView tvStep = (TextView) v.findViewById(R.id.tv_unlock);
-        tvStep.setText(String.valueOf(mFood.getmRequiredStepCount()));
+        tvStep.setText("Need " + String.valueOf(mFood.getmRequiredStepCount()) + " step point.");
 
         ImageView ivThumb = (ImageView) v.findViewById(R.id.iv_lockedcity);
 
-        new AssetImageTask(getActivity(), ivThumb).execute(mFood.getmAssetImagePath());
+        new AssetImageTask(getActivity(), ivThumb).execute(mFood.getmName_eng(), mFood.getmAssetImagePath());
 
         builder.setView(v)
                 // Add action buttons
@@ -79,7 +79,7 @@ public class UnlockFragment extends DialogFragment {
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        UnlockFragment.this.getDialog().cancel();
+                        UnlockDialogFragment.this.getDialog().cancel();
                     }
                 });
 

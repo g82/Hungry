@@ -1,11 +1,17 @@
 package com.gamepari.hungryadventure.contents;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.format.Time;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,9 +26,11 @@ public class HungryDatabase extends SQLiteOpenHelper {
     public static final String TABLE_CITY = "tb_city";
     private static final String TABLE_USER = "tb_user";
 
+    private Context mContext;
+
     public HungryDatabase(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
-
+        mContext = context;
     }
 
     private static final String makeFoodTableQuery() {
@@ -80,11 +88,70 @@ public class HungryDatabase extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(makeCityTableQuery());
 
         sqLiteDatabase.execSQL(makeFoodTableQuery());
-        sqLiteDatabase.execSQL(makeUserTableQuery());
+        //sqLiteDatabase.execSQL(makeUserTableQuery());
 
         sqLiteDatabase.execSQL(DummyInput.makeDummyCity());
-        sqLiteDatabase.execSQL(DummyInput.makeDummyFood());
 
+        try {
+            InputStream inputStream = mContext.getAssets().open("foods.csv");
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(inputStream, 1024)));
+
+            String line;
+
+            while (((line = br.readLine()) != null)) {
+
+                String columns[] = line.split(",");
+
+                /*
+                "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "local_name TEXT," +
+                        "eng_name TEXT," +
+                        "steps INTEGER," +
+                        "img_path TEXT," +
+                        "unlock_time TEXT," +
+                        "city_id INTEGER," +
+                        "calories INTEGER," +
+                        "cost TEXT" +
+                */
+
+                ContentValues contentValues = new ContentValues();
+                contentValues.put("local_name", columns[0]);
+                contentValues.put("eng_name", columns[1]);
+                contentValues.put("steps", Integer.valueOf(columns[2]));
+                contentValues.put("img_path", columns[3]);
+                contentValues.put("city_id", Integer.valueOf(columns[4]));
+                contentValues.put("calories", Integer.valueOf(columns[5]));
+                contentValues.put("cost", columns[6]);
+
+                sqLiteDatabase.insert(TABLE_FOODS, null, contentValues);
+            }
+
+            inputStream.close();
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public ModelFood unlockFood(String eng_name) {
+
+        SQLiteDatabase database = getWritableDatabase();
+
+        Time time = new Time();
+        time.setToNow();
+        long timeLong = time.toMillis(false);
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("unlock_time", String.valueOf(timeLong));
+
+        int affectedRows = database.update(TABLE_FOODS, contentValues, "eng_name=?", new String[]{eng_name});
+
+        database.close();
+
+        return null;
     }
 
     public List<ModelCity> getCities() {
@@ -127,16 +194,15 @@ public class HungryDatabase extends SQLiteOpenHelper {
             ModelFood food = new ModelFood(
                     cursor.getInt(0), cursor.getString(1), cursor.getString(2),
                     cursor.getInt(3), cursor.getString(4), null,
-                    cursor.getInt(6), cursor.getInt(7), cursor.getInt(8));
+                    cursor.getInt(6), cursor.getInt(7), cursor.getString(8));
 
             String timeStr = cursor.getString(5);
 
             if (timeStr != null) {
 
                 Time time = new Time();
-                time.parse(timeStr);
+                time.set(Long.parseLong(timeStr));
                 food.setmUnlockTime(time);
-
             }
 
             listFoods.add(food);

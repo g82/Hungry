@@ -8,12 +8,25 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".SelectRoadActivity">
 
+    <TextView
+        android:id="@+id/tvStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:text="Start your journey."
+        android:textSize="24sp" />
+
     <Button
         android:id="@+id/btn_start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="That's Eat!" />
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:padding="16dp"
+        android:text="That's Eat!"
+        android:textColor="#424242"
+        android:textSize="18sp" />
 
 
     <android.support.v4.view.ViewPager
@@ -21,6 +34,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/btn_start"
-        android:layout_alignParentTop="true" />
+        android:layout_below="@id/tvStart" />
 
 </RelativeLayout>

@@ -10,12 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gamepari.hungryadventure.assets.AssetImageTask;
 import com.gamepari.hungryadventure.contents.ModelFood;
-
-import java.text.SimpleDateFormat;
+import com.gamepari.hungryadventure.preferences.PreferenceIO;
 
 
 /**
@@ -72,7 +73,7 @@ public class FoodPageFragment extends Fragment {
 
         ImageView ivFood = (ImageView) v.findViewById(R.id.iv_food);
 
-        new AssetImageTask(mActivity, ivFood).execute(food.getmName_local(), food.getmAssetImagePath());
+        new AssetImageTask(mActivity, ivFood).execute(food.getmName_eng(), food.getmAssetImagePath());
 
         FrameLayout flLocked = (FrameLayout) v.findViewById(R.id.fl_locked);
         TextView tvName = (TextView) v.findViewById(R.id.tv_food_name);
@@ -86,22 +87,48 @@ public class FoodPageFragment extends Fragment {
 
             tvName.setText("Locked");
             tvDate.setVisibility(View.INVISIBLE);
+
+            TextView tvLockSp = (TextView) v.findViewById(R.id.tv_locksp);
+            tvLockSp.setText(String.valueOf(modelFood.getmRequiredStepCount()));
+            ivFood.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    int needPoint = modelFood.getmRequiredStepCount();
+                    int availpoint = PreferenceIO.loadAvailCount(getActivity(), PreferenceIO.KEY_AVAIL_STEPS);
+
+                    if (needPoint <= availpoint) {
+                        mActivity.showUnlockDialog(modelFood);
+                    } else {
+                        Toast.makeText(getActivity(), "more... more walk!!!", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            });
+
         } else {
             //FOOD UNLOCK.
-            flLocked.setVisibility(View.INVISIBLE);
+            flLocked.setVisibility(View.GONE);
 
-            tvName.setText(food.getmName_local());
+            LinearLayout ll_box = (LinearLayout) v.findViewById(R.id.ll_infobox);
+            ll_box.setVisibility(View.VISIBLE);
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM dd, yyyy");
-            tvDate.setText("Unlocked " + simpleDateFormat.format(unlockedDate));
+            tvName.setText(food.getmName_local() + " / " + food.getmName_eng());
+
+//            TextView tvEngName = (TextView) v.findViewById(R.id.tv_eng_name);
+//            tvEngName.setText(modelFood.getmName_eng());
+
+            TextView tvCal = (TextView) v.findViewById(R.id.tv_calories);
+            tvCal.setText(String.valueOf(food.getmCalories()) + "Kcal");
+
+            TextView tvCost = (TextView) v.findViewById(R.id.tv_cost);
+            tvCost.setText(modelFood.getmCost());
+
+
+            //SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM dd, yyyy");
+            tvDate.setText("Unlocked " + unlockedDate.format("%m %d %Y"));
         }
 
-        ivFood.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mActivity.showUnlockDialog(modelFood);
-            }
-        });
 
         return v;
     }
