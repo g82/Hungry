@@ -99,7 +99,7 @@ public class FoodPageFragment extends Fragment {
         ivFood.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mActivity.showUnlockDialog();
+                mActivity.showUnlockDialog(modelFood);
             }
         });
 

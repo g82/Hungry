@@ -8,6 +8,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.gamepari.hungryadventure.assets.AssetImageTask;
+import com.gamepari.hungryadventure.contents.ModelFood;
 
 /**
  * Created by gamepari on 2/17/15.
@@ -16,6 +22,12 @@ public class UnlockFragment extends DialogFragment {
 
 
     private UnlockDialogListener mUnlockDialogListener;
+    private ModelFood mFood;
+
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
+    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -31,6 +43,12 @@ public class UnlockFragment extends DialogFragment {
         }
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mFood = (ModelFood) getArguments().getSerializable("food");
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -42,12 +60,21 @@ public class UnlockFragment extends DialogFragment {
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
 
-        builder.setView(inflater.inflate(R.layout.dialog_unlock, null))
+        View v = inflater.inflate(R.layout.dialog_unlock, null);
+
+        TextView tvStep = (TextView) v.findViewById(R.id.tv_unlock);
+        tvStep.setText(String.valueOf(mFood.getmRequiredStepCount()));
+
+        ImageView ivThumb = (ImageView) v.findViewById(R.id.iv_lockedcity);
+
+        new AssetImageTask(getActivity(), ivThumb).execute(mFood.getmAssetImagePath());
+
+        builder.setView(v)
                 // Add action buttons
                 .setPositiveButton(R.string.unlock, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-
+                        mUnlockDialogListener.onDialogPositiveClick(mFood);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -56,13 +83,12 @@ public class UnlockFragment extends DialogFragment {
                     }
                 });
 
-
         return builder.create();
 
     }
 
     public interface UnlockDialogListener {
-        public void onDialogPositiveClick(DialogFragment dialog);
+        public void onDialogPositiveClick(ModelFood food);
 
         public void onDialogNegativeClick(DialogFragment dialog);
     }

@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class AdventureActivity extends ActionBarActivity implements View.OnClickListener {
+public class AdventureActivity extends ActionBarActivity implements View.OnClickListener, UnlockFragment.UnlockDialogListener {
 
     private static final String TAG = "AdventureActivity";
     private static final int REQUEST_RESOLVE_ERROR = 1001;
@@ -69,6 +69,16 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         viewPager.setAdapter(mFoodPagerAdapter);
 
         new DatabaseTask().execute("GET_FOOD", countryName);
+    }
+
+    @Override
+    public void onDialogPositiveClick(ModelFood food) {
+        //TODO update data
+        new DatabaseTask().execute("UNLOCK_FOOD", food.getmName_eng());
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
     }
 
     private void buildGoogleClient() {
@@ -200,9 +210,13 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         }
     }
 
-    public void showUnlockDialog() {
+    public void showUnlockDialog(ModelFood modelFood) {
         // Create an instance of the dialog fragment and show it
         DialogFragment dialog = new UnlockFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("food", modelFood);
+        dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "UnlockFragment");
     }
 
