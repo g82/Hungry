@@ -69,10 +69,6 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         mViewPager = (ViewPager) findViewById(R.id.vpager_foods);
         mViewPager.setOffscreenPageLimit(3);
         mViewPager.setPageMargin(-500);
-
-        //mFoodPagerAdapter = new FoodsPagerAdapter(getSupportFragmentManager());
-
-        //mViewPager.setAdapter(mFoodPagerAdapter);
     }
 
     @Override
@@ -88,11 +84,54 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
 
         tvSteps.setText("Available step point : " + String.valueOf(remainPoint));
 
+        String usedStep = PreferenceIO.loadPreference(this, PreferenceIO.KEY_USED_STEPS);
+        int usedstp = Integer.valueOf(usedStep);
+
+        usedstp += needPoint;
+
+        PreferenceIO.savePreference(this, PreferenceIO.KEY_USED_STEPS, String.valueOf(usedstp));
+
         new DatabaseTask().execute(DatabaseTask.OPER_UNLOCK_FOOD, food.getmName_eng());
     }
 
     @Override
     public void onDialogNegativeClick(DialogFragment dialog) {
+    }
+
+    private void loadFitData() {
+        String startDate = PreferenceIO.loadPreference(AdventureActivity.this,
+                PreferenceIO.KEY_START_DATE);
+
+        findViewById(R.id.fl_loading).setVisibility(View.GONE);
+
+        new FitDataProvider(new FitDataProvider.OnDataProvideListener() {
+            @Override
+            public void onDataLoaded(Object o) {
+
+                List<FitData> listFitData = (List<FitData>) o;
+
+                int totalSteps = 0;
+                for (FitData fit : listFitData) {
+                    totalSteps += fit.getValue();
+                }
+
+                totalSteps = (totalSteps > 0) ? totalSteps : 0;
+
+                String usedSteps = PreferenceIO.loadPreference(AdventureActivity.this, PreferenceIO.KEY_USED_STEPS);
+                if (usedSteps == null) usedSteps = "0";
+                int availstep = totalSteps - Integer.valueOf(usedSteps);
+
+                PreferenceIO.saveAvailCount(AdventureActivity.this, PreferenceIO.KEY_AVAIL_STEPS, availstep);
+
+                availstep = PreferenceIO.loadAvailCount(AdventureActivity.this, PreferenceIO.KEY_AVAIL_STEPS);
+
+                tvSteps.setText("Available step point : " + String.valueOf(availstep));
+                tvTotalSteps.setText("Total step point in " + cityName + " : " + String.valueOf(totalSteps));
+
+
+            }
+        }, mGoogleApiClient).execute(startDate);
+
     }
 
     private void buildGoogleClient() {
@@ -106,34 +145,7 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
 
                         Log.d(TAG, "onConnected");
 
-                        String startDate = PreferenceIO.loadPreference(AdventureActivity.this,
-                                PreferenceIO.KEY_START_DATE);
-
-                        findViewById(R.id.fl_loading).setVisibility(View.GONE);
-
-                        new FitDataProvider(new FitDataProvider.OnDataProvideListener() {
-                            @Override
-                            public void onDataLoaded(Object o) {
-
-                                List<FitData> listFitData = (List<FitData>) o;
-
-                                int totalSteps = 0;
-                                for (FitData fit : listFitData) {
-                                    totalSteps += fit.getValue();
-                                }
-
-                                totalSteps = (totalSteps > 0) ? totalSteps : 0;
-
-                                String usedSteps = PreferenceIO.loadPreference(AdventureActivity.this, PreferenceIO.KEY_USED_STEPS);
-                                if (usedSteps == null) usedSteps = "0";
-                                int availstep = totalSteps - Integer.valueOf(usedSteps);
-
-                                tvSteps.setText("Available step point : " + String.valueOf(availstep));
-                                tvTotalSteps.setText("Total step point in " + cityName + " : " + String.valueOf(totalSteps));
-
-
-                            }
-                        }, mGoogleApiClient).execute(startDate);
+                        loadFitData();
 
 
                         new DatabaseTask().execute(DatabaseTask.OPER_GET_FOOD, cityName);
