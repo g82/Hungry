@@ -85,6 +85,9 @@ public class AdventureActivity extends ActionBarActivity implements View.OnClick
         tvSteps.setText("Available step point : " + String.valueOf(remainPoint));
 
         String usedStep = PreferenceIO.loadPreference(this, PreferenceIO.KEY_USED_STEPS);
+
+        if (usedStep == null) usedStep = "0";
+
         int usedstp = Integer.valueOf(usedStep);
 
         usedstp += needPoint;

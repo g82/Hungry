@@ -113,10 +113,10 @@ public class FoodPageFragment extends Fragment {
             LinearLayout ll_box = (LinearLayout) v.findViewById(R.id.ll_infobox);
             ll_box.setVisibility(View.VISIBLE);
 
-            tvName.setText(food.getmName_local() + " / " + food.getmName_eng());
+            tvName.setText(food.getmName_local());
 
-//            TextView tvEngName = (TextView) v.findViewById(R.id.tv_eng_name);
-//            tvEngName.setText(modelFood.getmName_eng());
+            TextView tvEngName = (TextView) v.findViewById(R.id.tv_eng_name);
+            tvEngName.setText(modelFood.getmName_eng());
 
             TextView tvCal = (TextView) v.findViewById(R.id.tv_calories);
             tvCal.setText(String.valueOf(food.getmCalories()) + "Kcal");
